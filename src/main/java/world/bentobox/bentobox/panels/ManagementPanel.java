@@ -34,8 +34,9 @@ public class ManagementPanel implements BentoBoxInventoryProvider {
 
     @Override
     public void init(@NonNull BentoBox plugin, @NonNull User user, @NonNull InventoryContents contents) {
-        contents.add(ClickableItem.of(Items.LOOKS_EMPTY.to(user), e -> CatalogPanel.openPanel(user, CatalogPanel.View.GAMEMODES)));
         contents.fillBorders(ClickableItem.empty(new ItemStack(Material.LIGHT_BLUE_STAINED_GLASS_PANE)));
+
+        contents.set(2, 4, ClickableItem.of(Items.LOOKS_EMPTY.to(user), e -> CatalogPanel.openPanel(user, CatalogPanel.View.GAMEMODES)));
     }
 
     /**
