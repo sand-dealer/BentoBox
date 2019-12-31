@@ -2,6 +2,7 @@ package world.bentobox.bentobox.api.commands.island;
 
 import java.util.List;
 
+import fr.minuskube.inv.SmartInventory;
 import world.bentobox.bentobox.api.commands.CompositeCommand;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.panels.LanguagePanel;
@@ -24,7 +25,12 @@ public class IslandLanguageCommand extends CompositeCommand {
 
     @Override
     public boolean execute(User user, String label, List<String> args) {
-        LanguagePanel.openPanel(user);
+        SmartInventory.builder()
+                .title(user.getTranslation("language.panel-title"))
+                .manager(getPlugin().getInventoryManager())
+                .provider(new LanguagePanel())
+                .build()
+                .open(user.getPlayer());
         return true;
     }
 }

@@ -3,32 +3,40 @@ package world.bentobox.bentobox.panels;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import fr.minuskube.inv.ClickableItem;
+import fr.minuskube.inv.content.InventoryContents;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.inventory.ItemStack;
 import org.eclipse.jdt.annotation.NonNull;
 
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.addons.Addon;
 import world.bentobox.bentobox.api.addons.GameModeAddon;
 import world.bentobox.bentobox.api.hooks.Hook;
+import world.bentobox.bentobox.api.inventory.content.BentoBoxInventoryProvider;
 import world.bentobox.bentobox.api.localization.TextVariables;
 import world.bentobox.bentobox.api.panels.PanelItem;
 import world.bentobox.bentobox.api.panels.builders.PanelBuilder;
 import world.bentobox.bentobox.api.panels.builders.PanelItemBuilder;
 import world.bentobox.bentobox.api.user.User;
+import world.bentobox.bentobox.lists.Items;
 import world.bentobox.bentobox.versions.ServerCompatibility;
 
 /**
  * @author Poslovitch
  * @since 1.5.0
  */
-public class ManagementPanel {
+public class ManagementPanel implements BentoBoxInventoryProvider {
 
     private static final String LOCALE_REF = "management.panel.";
-    private static final int[] PANES = {0, 4, 5, 8, 9, 18, 26, 27, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44};
 
-    private ManagementPanel() {}
+    @Override
+    public void init(@NonNull BentoBox plugin, @NonNull User user, @NonNull InventoryContents contents) {
+        contents.add(ClickableItem.of(Items.LOOKS_EMPTY.to(user), e -> CatalogPanel.openPanel(user, CatalogPanel.View.GAMEMODES)));
+        contents.fillBorders(ClickableItem.empty(new ItemStack(Material.LIGHT_BLUE_STAINED_GLASS_PANE)));
+    }
 
     /**
      * Dynamically creates the panel.
@@ -43,9 +51,6 @@ public class ManagementPanel {
 
         // Setup header and corner
         setupHeader(builder, user, view);
-        for (int i : PANES) {
-            builder.item(i, new PanelItemBuilder().icon(Material.LIGHT_BLUE_STAINED_GLASS_PANE).name(" ").build());
-        }
 
         // Setup the views
         int startSlot = 10;

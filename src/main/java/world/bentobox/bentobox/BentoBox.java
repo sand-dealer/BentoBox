@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import fr.minuskube.inv.InventoryManager;
+import fr.minuskube.inv.SmartInventory;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.generator.ChunkGenerator;
@@ -73,6 +75,7 @@ public class BentoBox extends JavaPlugin {
     private PlaceholdersManager placeholdersManager;
     private IslandDeletionManager islandDeletionManager;
     private WebManager webManager;
+    private InventoryManager inventoryManager;
 
     // Settings
     private Settings settings;
@@ -155,6 +158,10 @@ public class BentoBox extends JavaPlugin {
 
         // Locales manager must be loaded before addons
         localesManager = new LocalesManager(this);
+
+        // Inventory manager
+        inventoryManager = new InventoryManager(this);
+        inventoryManager.init();
 
         // Load hooks
         hooksManager = new HooksManager(this);
@@ -343,6 +350,15 @@ public class BentoBox extends JavaPlugin {
      */
     public IslandWorldManager getIWM() {
         return islandWorldManager;
+    }
+
+    /**
+     * Returns the InventoryManager.
+     * @return the InventoryManager.
+     * @since 1.10.0
+     */
+    public InventoryManager getInventoryManager() {
+        return inventoryManager;
     }
 
     /**
