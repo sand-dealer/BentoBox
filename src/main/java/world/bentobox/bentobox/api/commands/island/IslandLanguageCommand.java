@@ -5,7 +5,8 @@ import java.util.List;
 import fr.minuskube.inv.SmartInventory;
 import world.bentobox.bentobox.api.commands.CompositeCommand;
 import world.bentobox.bentobox.api.user.User;
-import world.bentobox.bentobox.panels.LanguagePanel;
+import world.bentobox.bentobox.panels.language.LanguageInventoryProvider;
+import world.bentobox.bentobox.panels.language.LanguagePanel;
 
 /**
  * @author Poslovitch
@@ -25,12 +26,7 @@ public class IslandLanguageCommand extends CompositeCommand {
 
     @Override
     public boolean execute(User user, String label, List<String> args) {
-        SmartInventory.builder()
-                .title(user.getTranslation("language.panel-title"))
-                .manager(getPlugin().getInventoryManager())
-                .provider(new LanguagePanel())
-                .build()
-                .open(user.getPlayer());
+        LanguagePanel.open(user);
         return true;
     }
 }

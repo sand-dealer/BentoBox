@@ -34,7 +34,11 @@ public class ManagementPanel implements BentoBoxInventoryProvider {
 
     @Override
     public void init(@NonNull BentoBox plugin, @NonNull User user, @NonNull InventoryContents contents) {
+        // Borders
         contents.fillBorders(ClickableItem.empty(new ItemStack(Material.LIGHT_BLUE_STAINED_GLASS_PANE)));
+
+        // Header
+
 
         contents.set(2, 4, ClickableItem.of(Items.LOOKS_EMPTY.to(user), e -> CatalogPanel.openPanel(user, CatalogPanel.View.GAMEMODES)));
     }
@@ -60,10 +64,6 @@ public class ManagementPanel implements BentoBoxInventoryProvider {
         switch (view) {
         case GAMEMODES:
             addons = plugin.getAddonsManager().getGameModeAddons();
-            if (addons.isEmpty()) {
-                looksEmpty(builder, user);
-                break;
-            }
             for (Addon addon : addons) {
                 GameModeAddon gameModeAddon = (GameModeAddon) addon;
                 PanelItem addonItem = new PanelItemBuilder()
@@ -97,10 +97,6 @@ public class ManagementPanel implements BentoBoxInventoryProvider {
             break;
         case ADDONS:
             addons = plugin.getAddonsManager().getEnabledAddons().stream().filter(addon -> !(addon instanceof GameModeAddon)).collect(Collectors.toList());
-            if (addons.isEmpty()) {
-                looksEmpty(builder, user);
-                break;
-            }
             for (Addon addon : addons) {
                 PanelItem addonItem = new PanelItemBuilder()
                         .icon(addon.getDescription().getIcon())
@@ -121,10 +117,6 @@ public class ManagementPanel implements BentoBoxInventoryProvider {
             }
             break;
         case HOOKS:
-            if (plugin.getHooks().getHooks().isEmpty()) {
-                looksEmpty(builder, user);
-                break;
-            }
             for (Hook hook : plugin.getHooks().getHooks()) {
                 PanelItem hookItem = new PanelItemBuilder()
                         .icon(hook.getIcon())
@@ -253,20 +245,6 @@ public class ManagementPanel implements BentoBoxInventoryProvider {
         }
 
         builder.item(7, compatibilityItemBuilder.build());
-    }
-
-    private static void looksEmpty(@NonNull PanelBuilder builder, @NonNull User user) {
-        PanelItem emptyHere = new PanelItemBuilder()
-                .icon(Material.STRUCTURE_VOID)
-                .name(user.getTranslation(LOCALE_REF + "buttons.empty-here.name"))
-                .description(user.getTranslation(LOCALE_REF + "buttons.empty-here.description"))
-                .clickHandler((panel, user1, clickType, slot) -> {
-                    CatalogPanel.openPanel(user, CatalogPanel.View.GAMEMODES);
-                    return true;
-                })
-                .build();
-
-        builder.item(22, emptyHere);
     }
 
     public enum View {

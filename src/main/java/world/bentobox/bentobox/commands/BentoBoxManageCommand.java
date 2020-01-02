@@ -2,10 +2,9 @@ package world.bentobox.bentobox.commands;
 
 import java.util.List;
 
-import fr.minuskube.inv.SmartInventory;
 import world.bentobox.bentobox.api.commands.CompositeCommand;
 import world.bentobox.bentobox.api.user.User;
-import world.bentobox.bentobox.panels.ManagementPanel;
+import world.bentobox.bentobox.panels.manager.ManagementPanel;
 
 /**
  * Displays the Management panel.
@@ -27,12 +26,7 @@ public class BentoBoxManageCommand extends CompositeCommand {
 
     @Override
     public boolean execute(User user, String label, List<String> args) {
-        SmartInventory.builder()
-                .title(user.getTranslation("management.panel.title"))
-                .manager(getPlugin().getInventoryManager())
-                .provider(new ManagementPanel())
-                .build()
-                .open(user.getPlayer());
+        ManagementPanel.open(user, ManagementPanel.View.GAMEMODES);
         return true;
     }
 }

@@ -1,4 +1,4 @@
-package world.bentobox.bentobox.panels;
+package world.bentobox.bentobox.panels.language;
 
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
@@ -20,7 +20,7 @@ import java.util.Locale;
 /**
  * @author Poslovitch
  */
-public class LanguagePanel implements BentoBoxInventoryProvider {
+public class LanguageInventoryProvider implements BentoBoxInventoryProvider {
 
     @Override
     public void init(@NonNull BentoBox plugin, @NonNull User user, @NonNull InventoryContents contents) {
