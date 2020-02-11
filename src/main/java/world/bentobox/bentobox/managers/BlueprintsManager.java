@@ -442,10 +442,13 @@ public class BlueprintsManager {
      * @return true if okay, false is there is a problem
      */
     public boolean paste(GameModeAddon addon, Island island, String name, Runnable task) {
+        long timer = System.currentTimeMillis();
+        plugin.logDebug("BPM: start");
         if (validate(addon, name) == null) {
             plugin.logError("Tried to paste '" + name + "' but the bundle is not loaded!");
             return false;
         }
+        plugin.logDebug("BPM: bundle valid " + (System.currentTimeMillis() - timer));
         BlueprintBundle bb = getBlueprintBundles(addon).get(name.toLowerCase(Locale.ENGLISH));
         if (!blueprints.containsKey(addon) || blueprints.get(addon).isEmpty()) {
             plugin.logError("No blueprints loaded for bundle '" + name + "'!");
@@ -460,8 +463,10 @@ public class BlueprintsManager {
                 plugin.logError("NO DEFAULT BLUEPRINT FOUND! Make sure 'island.blu' exists!");
             }
         }
+        plugin.logDebug("BPM: blueprint valid " + (System.currentTimeMillis() - timer));
         // Paste overworld
         if (bp != null) {
+            plugin.logDebug("BPM: going to paste overworld " + (System.currentTimeMillis() - timer));
             new BlueprintPaster(plugin, bp, addon.getOverWorld(), island, task);
         }
         // Make nether island
@@ -469,9 +474,10 @@ public class BlueprintsManager {
                 && addon.getWorldSettings().isNetherGenerate()
                 && addon.getWorldSettings().isNetherIslands()
                 && addon.getNetherWorld() != null) {
-            bp = getBlueprints(addon).get(bb.getBlueprint(World.Environment.NETHER));
-            if (bp != null) {
-                new BlueprintPaster(plugin, bp, addon.getNetherWorld(), island, null);
+            Blueprint netherBp = getBlueprints(addon).get(bb.getBlueprint(World.Environment.NETHER));
+            if (netherBp != null) {
+                plugin.logDebug("BPM: going to paste nether " + (System.currentTimeMillis() - timer));
+                Bukkit.getScheduler().runTaskLater(plugin, () -> new BlueprintPaster(plugin, netherBp, addon.getNetherWorld(), island, null), 100L);
             }
         }
         // Make end island
@@ -479,9 +485,10 @@ public class BlueprintsManager {
                 && addon.getWorldSettings().isEndGenerate()
                 && addon.getWorldSettings().isEndIslands()
                 && addon.getEndWorld() != null) {
-            bp = getBlueprints(addon).get(bb.getBlueprint(World.Environment.THE_END));
-            if (bp != null) {
-                new BlueprintPaster(plugin, bp, addon.getEndWorld(), island, null);
+            Blueprint endBp = getBlueprints(addon).get(bb.getBlueprint(World.Environment.THE_END));
+            if (endBp != null) {
+                plugin.logDebug("BPM: going to paste end " + (System.currentTimeMillis() - timer));
+                Bukkit.getScheduler().runTaskLater(plugin, () -> new BlueprintPaster(plugin, endBp, addon.getEndWorld(), island, null), 200L);
             }
         }
         return true;

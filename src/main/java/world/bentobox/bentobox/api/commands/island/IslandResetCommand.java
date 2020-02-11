@@ -119,10 +119,10 @@ public class IslandResetCommand extends ConfirmableCommand {
         user.sendMessage("commands.island.create.creating-island");
         // Get the player's old island
         Island oldIsland = getIslands().getIsland(getWorld(), user);
-
+        long timer = System.currentTimeMillis();
         // Kick all island members (including the owner)
         kickMembers(oldIsland);
-
+        getPlugin().logDebug("Kick members took " + (System.currentTimeMillis() - timer));
         // Add a reset
         getPlayers().addReset(getWorld(), user.getUniqueId());
 

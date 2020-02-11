@@ -159,6 +159,7 @@ public class NewIsland {
      * @throws IOException - if an island cannot be made. Message is the tag to show the user.
      */
     public void newIsland(Island oldIsland) throws IOException {
+        long timer = System.currentTimeMillis();
         Location next = null;
         if (plugin.getIslands().hasIsland(world, user)) {
             // Island exists, it just needs pasting
@@ -172,6 +173,7 @@ public class NewIsland {
                 plugin.logError("New island for user " + user.getName() + " was not reserved!");
             }
         }
+
         // If the reservation fails, then we need to make a new island anyway
         if (next == null) {
             next = this.locationStrategy.getNextLocation(world);
@@ -189,17 +191,22 @@ public class NewIsland {
         }
         // Clear any old home locations (they should be clear, but just in case)
         plugin.getPlayers().clearHomeLocations(world, user.getUniqueId());
+        plugin.logDebug("Newisland: cleared home locations " + (System.currentTimeMillis() - timer));
         // Set home location
         plugin.getPlayers().setHomeLocation(user, new Location(next.getWorld(), next.getX() + 0.5D, next.getY(), next.getZ() + 0.5D), 1);
+        plugin.logDebug("Newisland: hom location set " + (System.currentTimeMillis() - timer));
         // Reset deaths
         if (plugin.getIWM().isDeathsResetOnNewIsland(world)) {
             plugin.getPlayers().setDeaths(world, user.getUniqueId(), 0);
         }
+        plugin.logDebug("Newisland: deaths reset " + (System.currentTimeMillis() - timer));
         // Check if owner has a different range permission than the island size
         island.setProtectionRange(user.getPermissionValue(plugin.getIWM().getAddon(island.getWorld())
                 .map(GameModeAddon::getPermissionPrefix).orElse("") + "island.range", island.getProtectionRange()));
+        plugin.logDebug("Newisland: permission range check " + (System.currentTimeMillis() - timer));
         // Save the player so that if the server crashes weird things won't happen
         plugin.getPlayers().save(user.getUniqueId());
+        plugin.logDebug("Newisland: player saved to DB " + (System.currentTimeMillis() - timer));
         // Fire event
         IslandBaseEvent event = IslandEvent.builder()
                 .involvedPlayer(user.getUniqueId())
@@ -211,6 +218,7 @@ public class NewIsland {
         if (event.isCancelled()) {
             return;
         }
+        plugin.logDebug("Newisland: event fired " + (System.currentTimeMillis() - timer));
         // Get the new BlueprintBundle if it was changed
         switch (reason) {
         case CREATE:
@@ -222,20 +230,23 @@ public class NewIsland {
         default:
             break;
         }
-
+        plugin.logDebug("Newisland: Blueprint bundle obtained " + (System.currentTimeMillis() - timer));
         // Task to run after creating the island
         Runnable task = () -> {
             // Set initial spawn point if one exists
             if (island.getSpawnPoint(Environment.NORMAL) != null) {
                 plugin.getPlayers().setHomeLocation(user, island.getSpawnPoint(Environment.NORMAL), 1);
             }
+            plugin.logDebug("Newisland task: spawn point set " + (System.currentTimeMillis() - timer));
             // Stop the player from falling or moving if they are
             if (user.isOnline()) {
                 if (reason.equals(Reason.RESET) || (reason.equals(Reason.CREATE) && plugin.getIWM().isTeleportPlayerToIslandUponIslandCreation(world))) {
                     user.getPlayer().setVelocity(new Vector(0, 0, 0));
                     user.getPlayer().setFallDistance(0F);
+                    plugin.logDebug("Newisland: player velocity set " + (System.currentTimeMillis() - timer));
                     // Teleport player after this island is built
                     plugin.getIslands().homeTeleport(world, user.getPlayer(), true);
+                    plugin.logDebug("Newisland: player teleport home " + (System.currentTimeMillis() - timer));
                 } else {
                     // let's send him a message so that he knows he can teleport to his island!
                     user.sendMessage("commands.island.create.you-can-teleport-to-your-island");
@@ -247,6 +258,7 @@ public class NewIsland {
             // Delete old island
             if (oldIsland != null) {
                 // Delete the old island
+                plugin.logDebug("Newisland: starting to delete old island " + (System.currentTimeMillis() - timer));
                 plugin.getIslands().deleteIsland(oldIsland, true, user.getUniqueId());
             }
 
@@ -268,17 +280,23 @@ public class NewIsland {
             .island(island)
             .location(island.getCenter())
             .build();
+            plugin.logDebug("Newisland: Final exit event fired " + (System.currentTimeMillis() - timer));
         };
         if (noPaste) {
             Bukkit.getScheduler().runTask(plugin, task);
         } else {
             // Create islands
+            plugin.logDebug("Newisland: Going to create island " + (System.currentTimeMillis() - timer));
             plugin.getBlueprintsManager().paste(addon, island, name, task);
         }
         // Set default settings
+        plugin.logDebug("Newisland: setting defaults " + (System.currentTimeMillis() - timer));
         island.setFlagsDefaults();
+        plugin.logDebug("Newisland: default flags set for island " + (System.currentTimeMillis() - timer));
         plugin.getMetrics().ifPresent(BStats::increaseIslandsCreatedCount);
+        plugin.logDebug("Newisland: bstats " + (System.currentTimeMillis() - timer));
         // Save island
         plugin.getIslands().save(island);
+        plugin.logDebug("Newisland: island saved " + (System.currentTimeMillis() - timer));
     }
 }

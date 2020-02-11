@@ -41,7 +41,6 @@ import world.bentobox.bentobox.blueprints.dataobjects.BlueprintBlock;
 import world.bentobox.bentobox.blueprints.dataobjects.BlueprintCreatureSpawner;
 import world.bentobox.bentobox.blueprints.dataobjects.BlueprintEntity;
 import world.bentobox.bentobox.database.objects.Island;
-import world.bentobox.bentobox.managers.BlueprintsManager;
 import world.bentobox.bentobox.util.Util;
 
 /**
@@ -71,7 +70,7 @@ public class BlueprintPaster {
     private static final String MINECRAFT = "minecraft:";
 
     private static final Map<String, String> BLOCK_CONVERSION = ImmutableMap.of("sign", "oak_sign", "wall_sign", "oak_wall_sign");
-    
+
     private BentoBox plugin;
     // The minimum block position (x,y,z)
     private Location pos1;
@@ -142,7 +141,7 @@ public class BlueprintPaster {
         Vector off = bp.getBedrock() != null ? bp.getBedrock() : new Vector(0,0,0);
         // Calculate location for pasting
         this.location = island.getCenter().toVector().subtract(off).toLocation(world);
-
+        plugin.logDebug("Paster: started for " + world.getName());
         // Paste
         paste();
     }
@@ -151,6 +150,7 @@ public class BlueprintPaster {
      * The main pasting method
      */
     private void paste() {
+        long timer = System.currentTimeMillis();
         // Iterators for the various maps to paste
         Map<Vector, BlueprintBlock> blocks = blueprint.getBlocks() == null ? Collections.emptyMap() : blueprint.getBlocks();
         Map<Vector, BlueprintBlock> attached = blueprint.getAttached() == null ? Collections.emptyMap() : blueprint.getAttached();
@@ -178,10 +178,9 @@ public class BlueprintPaster {
         });
 
         pastingTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            long timer = System.currentTimeMillis();
             int count = 0;
             if (pasteState.equals(PasteState.CHUNK_LOAD)) {
-                pasteState = PasteState.CHUNK_LOADING;                
+                pasteState = PasteState.CHUNK_LOADING;
                 // Load chunk
                 Util.getChunkAtAsync(location).thenRun(() -> {
                     pasteState = PasteState.BLOCKS;
@@ -189,7 +188,9 @@ public class BlueprintPaster {
                     if (duration > chunkLoadTime) {
                         chunkLoadTime = duration;
                     }
-                }); 
+                    plugin.logDebug("Paste state " + pasteState + (System.currentTimeMillis() - timer) + " for " + location.getWorld().getName());
+
+                });
             }
             while (pasteState.equals(PasteState.BLOCKS) && count < pasteSpeed && it.hasNext()) {
                 pasteBlock(location, it.next());
@@ -203,6 +204,7 @@ public class BlueprintPaster {
                 pasteEntity(location, it3.next());
                 count++;
             }
+            plugin.logDebug("Paste state " + pasteState + " " + count + " " + (System.currentTimeMillis() - timer) + " for " + location.getWorld().getName());
             // STATE SHIFT
             if (pasteState.equals(PasteState.BLOCKS) && !it.hasNext()) {
                 // Blocks done

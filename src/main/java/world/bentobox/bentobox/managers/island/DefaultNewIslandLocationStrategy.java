@@ -36,6 +36,8 @@ public class DefaultNewIslandLocationStrategy implements NewIslandLocationStrate
 
     @Override
     public Location getNextLocation(World world) {
+        long timer = System.currentTimeMillis();
+        plugin.logDebug("new island location started");
         Location last = plugin.getIslands().getLast(world);
         if (last == null) {
             last = new Location(world,
@@ -45,17 +47,19 @@ public class DefaultNewIslandLocationStrategy implements NewIslandLocationStrate
         }
         // Find a free spot
         Map<Result, Integer> result = new EnumMap<>(Result.class);
+        plugin.logDebug("NIL got start loc " + (System.currentTimeMillis() - timer));
         // Check center
         last = Util.getClosestIsland(last);
         Result r = isIsland(last);
-
+        plugin.logDebug("NIL tried first spot " + (System.currentTimeMillis() - timer));
         while (!r.equals(Result.FREE) && result.getOrDefault(Result.BLOCKS_IN_AREA, 0) < MAX_UNOWNED_ISLANDS) {
             nextGridLocation(last);
             last = Util.getClosestIsland(last);
             result.put(r, result.getOrDefault(r, 0) + 1);
             r = isIsland(last);
+            plugin.logDebug("NIL island spot checked " + (System.currentTimeMillis() - timer));
         }
-
+        plugin.logDebug("NIL found actual spot " + (System.currentTimeMillis() - timer));
         if (!r.equals(Result.FREE)) {
             // We could not find a free spot within the limit required. It's likely this
             // world is not empty
@@ -101,7 +105,7 @@ public class DefaultNewIslandLocationStrategy implements NewIslandLocationStrate
             return Result.FREE;
         }
         // Block check
-        if (!plugin.getIWM().isUseOwnGenerator(world) && Arrays.asList(BlockFace.values()).stream().anyMatch(bf -> 
+        if (!plugin.getIWM().isUseOwnGenerator(world) && Arrays.asList(BlockFace.values()).stream().anyMatch(bf ->
         !location.getBlock().getRelative(bf).isEmpty() && !location.getBlock().getRelative(bf).getType().equals(Material.WATER))) {
             // Block found
             plugin.getIslands().createIsland(location);
