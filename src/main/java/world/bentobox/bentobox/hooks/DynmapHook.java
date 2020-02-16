@@ -3,9 +3,11 @@ package world.bentobox.bentobox.hooks;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.dynmap.DynmapAPI;
 import org.dynmap.markers.MarkerAPI;
+import org.dynmap.markers.MarkerIcon;
 import org.dynmap.markers.MarkerSet;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -13,6 +15,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.addons.GameModeAddon;
 import world.bentobox.bentobox.api.hooks.Hook;
+import world.bentobox.bentobox.database.objects.Island;
 
 /**
  * @author Poslovitch
@@ -44,6 +47,10 @@ public class DynmapHook extends Hook {
 
             BentoBox.getInstance().getAddonsManager().getGameModeAddons().forEach(this::registerMarkerSet);
 
+            for (Island island : BentoBox.getInstance().getIslands().getIslands()) {
+                createIslandMarker(island);
+            }
+
             return true;
         } catch (Exception e) {
             return false;
@@ -71,6 +78,18 @@ public class DynmapHook extends Hook {
         } else {
             return markerAPI.getMarkerSet(addon.getDescription().getName().toLowerCase() + ".markers");
         }
+    }
+
+    public void createMarker(@NonNull GameModeAddon addon, String id, String label, Location location) {
+        getMarkerSet(addon).createMarker(id, label, location.getWorld().getName(),
+                location.getBlockX(), location.getBlockY(), location.getBlockZ(),
+                getMarkerAPI().getMarkerIcons().stream().findFirst().get(), false);
+    }
+
+    public void createIslandMarker(@NonNull Island island) {
+        createMarker((GameModeAddon) BentoBox.getInstance().getAddonsManager().getAddonByName(island.getGameMode()).get(),
+                island.getUniqueId(), BentoBox.getInstance().getPlayers().getName(island.getOwner()),
+                island.getCenter());
     }
 
     /**
